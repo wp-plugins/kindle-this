@@ -5,7 +5,7 @@ Requires at least: 2.8
 Tested up to: 3.1
 Contributors: Keith P. Graham
 
-Sends a blog post or page to free.kindle.com for conversion.
+Sends a blog post or page to a user's kindle.
 
 == Description ==
 Kindle-This is a sidebar widget that displays a button for sending a blog page to a user's Kindle using free.kindle.com automatic conversion.
