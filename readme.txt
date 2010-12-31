@@ -1,6 +1,6 @@
 === Kindle This Widget ===
 Tags: Amazon, Kindle, sidebar, widget
-Stable tag: 1.0
+Stable tag: 1.1
 Requires at least: 2.8
 Tested up to: 3.1
 Contributors: Keith P. Graham
@@ -29,6 +29,9 @@ The widget uses only the free.kindle.com service so the document will appear on 
 
 = 1.0 =
 * initial test release
+
+= 1.1 =
+* Fixed bug in unused code
 
 
 == Support ==

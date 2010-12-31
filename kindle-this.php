@@ -4,7 +4,7 @@ Plugin Name: Kindle This Widget
 Plugin URI: http://www.blogseye.com
 Description: Sends a blog post or page to a user's kindle.
 Author: Keith P. Graham
-Version: 1.0
+Version: 1.1
 Requires at least: 2.8
 Author URI: http://www.blogseye.com
 Tested up to: 3.1
@@ -48,10 +48,10 @@ class widget_kindle_this extends WP_Widget {
 		extract( $args );
 		$title = esc_attr($instance['title']);
 		$from = esc_attr($instance['from']);
-		if (empty($from)) {
-			echo "no from address specified for Kindle This widget";
-			return;
-		}
+		//if (empty($from)) {
+		//	echo "no from address specified for Kindle This widget";
+		//	return;
+		//}
 		// the loop ids have been cached - get them back
 		$p=wp_cache_get( 'kindle_this');
 
