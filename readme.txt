@@ -10,7 +10,7 @@ Sends a blog post or page to free.kindle.com for conversion.
 == Description ==
 Kindle-This is a sidebar widget that displays a button for sending a blog page to a user's Kindle using free.kindle.com automatic conversion.
 
-The contents of the current page are extracted and the title, post date, and content are formatted into a simple page that is sent to the kindle service for conversion into a kindle file. The results are not a web page, but a Kindle document so that links, images, embeds, javascript, etc will not appear.
+The contents of the current page are extracted and the title, post date, and content are formatted into a simple page that is sent to the kindle service for conversion into a kindle file. The results are not a web page, but a Kindle document so that links, images, embeds, javascript, etc may not appear.
 
 The widget requires the user to enter his Kindle email id and the email address that is authorized to send documents to the Kindle service. The authorized email is not stored in order to prevent Kindle spam.
 
