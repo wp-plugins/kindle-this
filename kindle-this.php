@@ -23,7 +23,6 @@ class widget_kindle_this extends WP_Widget {
 		// this is the html to display the options
 
 		$title = esc_attr($instance['title']);
-		$from = esc_attr($instance['from']);
        ?>
 <fieldset style="border:thin black solid;padding:2px;"><legend>Title:</legend>	
 		<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
@@ -47,11 +46,6 @@ class widget_kindle_this extends WP_Widget {
 		// outputs the content of the widget
 		extract( $args );
 		$title = esc_attr($instance['title']);
-		$from = esc_attr($instance['from']);
-		//if (empty($from)) {
-		//	echo "no from address specified for Kindle This widget";
-		//	return;
-		//}
 		// the loop ids have been cached - get them back
 		$p=wp_cache_get( 'kindle_this');
 
@@ -107,7 +101,7 @@ function kpg_kindle_this_init() {
 	add_action('admin_menu', 'kpg_kindle_this_init');	
 function kpg_kindle_this_control() {
 	// this is the Kindle This functionality.
-    echo "<h2>Kindel This</h2>";
+    echo "<h2>Kindle This</h2>";
 ?>
 	<p>The Kindle-This widget is installed and working correctly.</p>
 	
@@ -121,7 +115,7 @@ function kpg_kindle_this_control() {
 		$count=$options['count'];
 	}
 	?>
-	<p>Number of Kindle pages sent=<?php echo $count; ?></p>
+	<p>Number of Kindle pages sent: <?php echo $count; ?></p>
 	
 	<?php
 
