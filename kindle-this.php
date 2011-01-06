@@ -4,7 +4,7 @@ Plugin Name: Kindle This Widget
 Plugin URI: http://www.blogseye.com
 Description: Sends a blog post or page to a user's kindle.
 Author: Keith P. Graham
-Version: 1.1
+Version: 1.2
 Requires at least: 2.8
 Author URI: http://www.blogseye.com
 Tested up to: 3.1
@@ -58,12 +58,12 @@ class widget_kindle_this extends WP_Widget {
 			// this is the form for sending the widget
 			$path=home_url();
 		?>
-		<div style="font-style:italic;font-size:.85em;">
+		<div style="font-style:italic;font-size:.9em;">
 		<form name="kpgkindlethis" action="<?php echo $path; ?>" target="kindlethis" method="GET">
-				<fieldset style="border:thin black solid;padding:2px;"><legend>Your kindle email address:</legend>
-				<input style="font-size:.85em;" size="12" name="kindle_email" type="text" value="your-id"/>@free.kindle.com</fieldset>
-				<fieldset style="border:thin black solid;padding:2px;"><legend>Valid &quot;From&quot; email address:</legend>
-				<input style="font-size:.85em;" size="16" name="from_email" type="text" value="good@email"/><br/>(email that kindle will accept)
+				<fieldset style="border:thin black solid;padding:2px;"><legend>your kindle email address:</legend>
+				<input style="font-size:.9em;" size="16" name="kindle_email" type="text" value="your-id"/>@free.kindle.com</fieldset>
+				<fieldset style="border:thin black solid;padding:2px;"><legend>valid from email address:</legend>
+				<input style="font-size:.9em;" size="16" name="from_email" type="text" value="good@email"/><br/>(email that kindle will accept)
 				</fieldset>
 				<input type="submit" name="kpg_ksub" value="send to kindle"/>
 				<input type="hidden" name="postarray" value="<?php echo $p;?>" />
@@ -101,21 +101,118 @@ function kpg_kindle_this_init() {
 	add_action('admin_menu', 'kpg_kindle_this_init');	
 function kpg_kindle_this_control() {
 	// this is the Kindle This functionality.
-    echo "<h2>Kindle This</h2>";
-?>
-	<p>The Kindle-This widget is installed and working correctly.</p>
-	
-	<?php
-	
-	$options=get_option('kpg_kindlethis_options');
+ 	$options=get_option('kpg_kindlethis_options');
 	if (empty($options)) $options=array();
 	// cache bad cases
-	$count=0;
 	if (array_key_exists('count',$options)) {
 		$count=$options['count'];
 	}
+?>
+
+<h2>Kindle This</h2>
+<p>The Kindle-This widget is installed and working correctly.</p>
+
+<p>Number of Kindle pages sent: <?php echo $count; ?></p>
+	
+	
+	<?php
+	
+// process form
+	$kpg_kindle_template_top='';
+	$kpg_kindle_template_post='';
+	$kpg_kindle_template_foot='';
+	if (array_key_exists('action',$_POST)) {
+		// check the nonce
+		if(wp_verify_nonce($_POST['kpg_kindle_this_control'],'kpgkindlethis_update')) { 
+			echo "<br/>Updating<br/>";
+			// pressed submit
+			// get the fields off from the form
+			// kpg_kindle_template_top, kpg_kindle_template_post, kpg_kindle_template_foot
+			if (array_key_exists('kpg_kindle_template_top',$_POST)) $kpg_kindle_template_top=stripslashes($_POST['kpg_kindle_template_top']);
+			if (array_key_exists('kpg_kindle_template_post',$_POST)) $kpg_kindle_template_post=stripslashes($_POST['kpg_kindle_template_post']);
+			if (array_key_exists('kpg_kindle_template_foot',$_POST)) $kpg_kindle_template_foot=stripslashes($_POST['kpg_kindle_template_foot']);
+			$options['kpg_kindle_template_top']=$kpg_kindle_template_top;
+			$options['kpg_kindle_template_post']=$kpg_kindle_template_post;
+			$options['kpg_kindle_template_foot']=$kpg_kindle_template_foot;
+			update_option('kpg_kindlethis_options',$ops);
+		}
+	}
+	if (array_key_exists('kpg_kindle_template_top',$options)) $kpg_kindle_template_top=$options['kpg_kindle_template_top'];
+	if (array_key_exists('kpg_kindle_template_post',$options)) $kpg_kindle_template_post=$options['kpg_kindle_template_post'];
+	if (array_key_exists('kpg_kindle_template_foot',$options)) $kpg_kindle_template_foot=$options['kpg_kindle_template_foot'];
+
+
+
+
+
+
 	?>
-	<p>Number of Kindle pages sent: <?php echo $count; ?></p>
+<h3>Templates</h3>
+<form method="post">
+ <form method="post" action="">
+    <input type="hidden" name="action" value="update" />
+     <?php wp_nonce_field('kpgkindlethis_update','kpg_kindle_this_control'); ?>
+<table class="form-table">
+	<tbody>
+	<tr valign="top">
+	<th scope="row">Kindle this template</th>
+	<td>
+	<p>This controls what will be displayed at the top before the actual content area. </p>
+	<p>You can use the following tags:</p>
+	<p><code>[kindle_blogname]</code> <code>[kindle_page_title]</code>  <code>[kindle_page_url]</code> <code>[kindle_blog_url]</code> <code>[kindle_blog_description]</code>  <code>[kindle_date]</code> </p>
+	<textarea rows="20" cols="50" id="kpg_kindle_template_top" name="kpg_kindle_template_top"><?php
+	if (!empty($kpg_kindle_template_top)) {
+		echo $kpg_kindle_template_top;
+	} else {
+	?>
+<h3>[kindle_blogname]</h3>
+<h4><a href="[kindle_page_url]">[kindle_page_title]</a></h4>
+<p>This is the page that your requested at [kindle_blogname].</p>
+<hr/>
+<?php } ?>
+</textarea>
+<hr/>
+	<p>This controls how the loop of blog posts will be displayed. </p>
+	<p>You can use the following tags, including the tags from the header:</p>
+	<p>.</p>
+	<p><code>[kindle_post_title]</code> <code>[kindle_post_date]</code>  <code>[kindle_post_content]</code> <code>[kindle_post_author]</code> <code>[kindle_post_url]</code> </p>
+	<textarea  rows="20" cols="50" id="kpg_kindle_template_post" name="kpg_kindle_template_post"><?php
+	if (!empty($kpg_kindle_template_post)) {
+		echo $kpg_kindle_template_post;
+	} else {
+	?><h3><a href="[kindle_post_url]">[kindle_post_title]</a></h3>
+<h4>[kindle_post_date] [kindle_post_author]</h4>
+<div>
+[kindle_post_content]
+</div>
+
+<hr/>
+	<?php } ?>
+	</textarea>
+	<hr/>
+	<p>This controls what will be displayed at the bottom after the posts. </p>
+	<p>You can use all the tags from the header:</p>
+	<textarea rows="20" cols="50" id="kpg_kindle_template_foot" name="kpg_kindle_template_foot"><?php
+	if (!empty($kpg_kindle_template_foot)) {
+		echo $kpg_kindle_template_foot;
+	} else {
+	?><p>Thank you for visiting [kindle_blogname]<p>
+<p>&nbsp;</p><p>&nbsp;</p>
+<p style="font-size:small;">The Free WordPress Kindle-This plugin was written by Keith P. Graham, author of <a href="http://www.amazon.com/gp/product/B004C05DTC?ie=UTF8&tag=thenewjt30page&linkCode=as2&camp=1789&creative=390957&creativeASIN=B004C05DTC">Error Message Eyes: a programmer's guide to the digital soul.</a></p>
+<hr/>
+<?php } ?>
+	</textarea>
+	
+	</td>
+</tr>
+</tbody></table>
+<p class="submit"><input class="button-primary" value="Save Changes" type="submit"></p>
+</form>
+	
+	
+	
+	
+	
 	
 	<?php
 
@@ -125,15 +222,18 @@ function kpg_kindle_this_control() {
 function kpg_kindle_this_catchloop($huh) {
     global $wp_query;
 	$posts = $wp_query->posts;
-	// capture the posts
 	$pids=array();
+	if (empty($posts)) {
+		wp_cache_set( 'kindle_this', serialize($pids) );
+		return $huh;
+	}
+	// capture the posts
 	foreach ($posts as $post) {
 		$id=$post->ID;
 		$pids[count($pids)]=$id;
 	}
 // cache the id array for latter	
     wp_cache_set( 'kindle_this', serialize($pids) );
-
 	return $huh;
 }
 
@@ -177,12 +277,33 @@ function kpg_kindle_this_mailer() {
 			flush();		
 			exit(); 
 	}
+	$options=get_option('kpg_kindlethis_options');
+	$kpg_kindle_template_top='<h3>[kindle_blogname]</h3>
+<h4><a href="[kindle_page_url]">[kindle_page_title]</a></h4>
+<p>This is the page that your requested at [kindle_blogname].</p>
+<hr/>
+';
+	$kpg_kindle_template_post='<h3><a href="[kindle_post_url]">[kindle_post_title]</a></h3>
+<h4>[kindle_post_date] [kindle_post_author]</h4>
+<div>
+[kindle_post_content]
+</div>
+
+<hr/>
+';
+	$kpg_kindle_template_foot="<p>Thank you for visiting [kindle_blogname]<p>
+<p>&nbsp;</p><p>&nbsp;</p>
+<p style=\"font-size:small;\">The Free WordPress Kindle-This plugin was written by Keith P. Graham, author of <a href=\"http://www.amazon.com/gp/product/B004C05DTC?ie=UTF8&tag=thenewjt30page&linkCode=as2&camp=1789&creative=390957&creativeASIN=B004C05DTC\">Error Message Eyes: a programmer's guide to the digital soul.</a></p>";
+	if (array_key_exists('kpg_kindle_template_top',$options)) $kpg_kindle_template_top=$options['kpg_kindle_template_top'];
+	if (array_key_exists('kpg_kindle_template_post',$options)) $kpg_kindle_template_post=$options['kpg_kindle_template_post'];
+	if (array_key_exists('kpg_kindle_template_foot',$options)) $kpg_kindle_template_foot=$options['kpg_kindle_template_foot'];
 	
 	$blog=get_bloginfo('name');
 	$blogurl=home_url();
 	$kt=$_GET['kindletitle'];
 	$kt=stripslashes($kt);
     $kl=$_GET['kindleloc'];
+	$kd=get_bloginfo('description');
     if (empty($kl)) $kl=$blogurl;
 	if (empty($kt)) $kt=$blog;
 	$filename=sanitize_title($kt).'.html';
@@ -190,8 +311,18 @@ function kpg_kindle_this_mailer() {
 	$ansa='<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><html>
 <head><title>test</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>
 <body>';
-	$ansa.="\r\n<h3>$kt</h3>\r\n";
-	$ansa.="\r\n<h4><a href=\"$kl\">$kl</a></h4>\r\n";
+
+// here do the replacement on the header section
+//[kindle_blogname] [kindle_page_title] [kindle_page_url] [kindle_blog_url] [kindle_blog_description] [kindle_date] 
+	$kpg_kindle_template_top=str_replace('[kindle_blogname]',$blog,$kpg_kindle_template_top);
+	$kpg_kindle_template_top=str_replace('[kindle_page_url]',$kl,$kpg_kindle_template_top);
+	$kpg_kindle_template_top=str_replace('[kindle_page_title]',$kt,$kpg_kindle_template_top);
+	$kpg_kindle_template_top=str_replace('[kindle_blog_url]',$blogurl,$kpg_kindle_template_top);
+	$kpg_kindle_template_top=str_replace('[kindle_blog_description]',$kd,$kpg_kindle_template_top);
+	$kpg_kindle_template_top=str_replace('[kindle_date]',date("Y/m/d"),$kpg_kindle_template_top);
+	
+	$ansa.=$kpg_kindle_template_top;
+	
 	$posts=unserialize($p);
 	if (!empty($p)&&!empty($ke)&&!empty($fe)&&!empty($posts)&&count($posts)>0) {
 		$ddate='';
@@ -200,14 +331,40 @@ function kpg_kindle_this_mailer() {
 			$post=get_post($id);
 			$title=$post->post_title;
 			$date=$post->post_date;
+			$author=$post->post_author;
+			$post_url=get_permalink($id);
 			if ($j==0) $ddate=$date;
 			$content=$post->post_content;
 			$content=do_shortcode($content);
-			$ansa.="<h3>$title</h3>";
-			$ansa.="<h4>$date</h4>";
-			$ansa.="<div>$content</div>\r\n";
-			$ansa.="\r\n<hr/>\r\n";
+			// do replacements on the post
+			$a=$kpg_kindle_template_post;
+			$a=str_replace('[kindle_blogname]',$blog,$a);
+			$a=str_replace('[kindle_page_url]',$kl,$a);
+			$a=str_replace('[kindle_page_title]',$kt,$a);
+			$a=str_replace('[kindle_blog_url]',$blogurl,$a);
+			$a=str_replace('[kindle_blog_description]',$kd,$a);
+			$a=str_replace('[kindle_date]',date("Y/m/d"),$a);
+			// post specific replacements
+			//[kindle_post_title] [kindle_post_date] [kindle_post_content] [kindle_post_author] [kindle_post_url]
+			$a=str_replace('[kindle_post_title]',$title,$a);
+			$a=str_replace('[kindle_post_date]',$date,$a);
+			$a=str_replace('[kindle_post_content]',$content,$a);
+			$a=str_replace('[kindle_post_author]',$author,$a);
+			$a=str_replace('[kindle_post_url]',$post_url,$a);
+			
+			$ansa.=$a;
+			
 		}
+		// now the bottom of the post with my little piece of self promotion
+	$kpg_kindle_template_foot=str_replace('[kindle_blogname]',$blog,$kpg_kindle_template_foot);
+	$kpg_kindle_template_foot=str_replace('[kindle_page_url]',$kl,$kpg_kindle_template_foot);
+	$kpg_kindle_template_foot=str_replace('[kindle_page_title]',$kt,$kpg_kindle_template_foot);
+	$kpg_kindle_template_foot=str_replace('[kindle_blog_url]',$blogurl,$kpg_kindle_template_foot);
+	$kpg_kindle_template_foot=str_replace('[kindle_blog_description]',$kd,$kpg_kindle_template_foot);
+	$kpg_kindle_template_foot=str_replace('[kindle_date]',date("Y/m/d"),$kpg_kindle_template_foot);
+	$ansa.=$kpg_kindle_template_foot;
+		
+		
 		$ansa.='</body></html>';
 		$to=$ke.'@free.kindle.com';
 		
@@ -449,6 +606,16 @@ function kpg_kindle_this_mail( $to, $subject, $message, $headers = '', $attachme
 	$result = @$phpmailer->Send();
 
 	return $result;
+}
+function kpg_kindle_this_uninstall() {
+	if(!current_user_can('manage_options')) {
+		die('Access Denied');
+	}
+	delete_option('kpg_kindlethis_options'); 
+	return;
+}  
+if ( function_exists('register_uninstall_hook') ) {
+	register_uninstall_hook(__FILE__, 'kpg_kindle_this_uninstall');
 }
 
 
