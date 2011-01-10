@@ -1,10 +1,10 @@
 <?php
 /*
-Plugin Name: Kindle This Widget
+Plugin Name: Kindle This
 Plugin URI: http://www.blogseye.com
 Description: Sends a blog post or page to a user's kindle.
 Author: Keith P. Graham
-Version: 1.2
+Version: 1.3
 Requires at least: 2.8
 Author URI: http://www.blogseye.com
 Tested up to: 3.1
@@ -48,36 +48,45 @@ class widget_kindle_this extends WP_Widget {
 		$title = esc_attr($instance['title']);
 		// the loop ids have been cached - get them back
 		$p=wp_cache_get( 'kindle_this');
-
+		if (empty($p)) $p=array();
+		$nonce='';
+		$idx=0;
+		$posts=array();
+		if (array_key_exists('nonce',$p)) $nonce=$p['nonce'];
+		if (array_key_exists('idx',$p)) $idx=$p['idx'];
+		if (array_key_exists('posts',$p)) $posts=$p['posts'];
+		$posts=serialize($posts);
+		$idx++;
+		$p['idx']=$idx;
+		wp_cache_set( 'kindle_this', $p );
 		
 		echo $before_widget;
 		if ( $title) {
 			echo $before_title . $title . $after_title;
 		}
 		// out goes out here;
-			// this is the form for sending the widget
-			$path=home_url();
+		// this is the form for sending the widget
+		$path=home_url();
 		?>
 		<div style="font-style:italic;font-size:.9em;">
-		<form name="kpgkindlethis" action="<?php echo $path; ?>" target="kindlethis" method="GET">
+		<form name="kpgkindlethis<?php echo $idx;?>" action="<?php echo $path; ?>" target="kindlethis<?php echo $idx;?>" method="GET">
 				<fieldset style="border:thin black solid;padding:2px;"><legend>your kindle email address:</legend>
 				<input style="font-size:.9em;" size="16" name="kindle_email" type="text" value="your-id"/>@free.kindle.com</fieldset>
 				<fieldset style="border:thin black solid;padding:2px;"><legend>valid from email address:</legend>
 				<input style="font-size:.9em;" size="16" name="from_email" type="text" value="good@email"/><br/>(email that kindle will accept)
 				</fieldset>
 				<input type="submit" name="kpg_ksub" value="send to kindle"/>
-				<input type="hidden" name="postarray" value="<?php echo $p;?>" />
+				<input type="hidden" name="postarray" value="<?php echo $posts;?>" />
 				<input type="hidden" name="kindletitle" value="" />
 				<input type="hidden" name="kindleloc" value="" />
-				<?php wp_nonce_field('kpgkindlethis','kpgkindlethisnonce'); ?>
-
+				<input type="hidden" name="kpgkindlethisnonce" value="<?php echo $nonce;?>" />
 				<script language="javascript" type="text/javascript">
-					document.kpgkindlethis.kindletitle.value=document.title;
-					document.kpgkindlethis.kindleloc.value=document.location;
+					document.kpgkindlethis<?php echo $idx;?>.kindletitle.value=document.title;
+					document.kpgkindlethis<?php echo $idx;?>.kindleloc.value=document.location;
 				</script>
 		</form>
 		</div>
-		<iframe style="visibility:hidden;position:absolute;left:-2;width:1;height:1;" name="kindlethis">
+		<iframe style="visibility:hidden;position:absolute;left:-2;width:1;height:1;" name="kindlethis<?php echo $idx;?>">
 		</iframe>
 		
 		<?PHP
@@ -148,7 +157,7 @@ function kpg_kindle_this_control() {
 
 	?>
 <h3>Templates</h3>
-<form method="post">
+
  <form method="post" action="">
     <input type="hidden" name="action" value="update" />
      <?php wp_nonce_field('kpgkindlethis_update','kpg_kindle_this_control'); ?>
@@ -220,26 +229,33 @@ function kpg_kindle_this_control() {
 // also have to hook the loop in order to catch the ids
 	add_action('loop_start', 'kpg_kindle_this_catchloop');	
 function kpg_kindle_this_catchloop($huh) {
+	// this sets up the common array for the forms
+	// store these items in an array for this
+	$p=array();
+	// set up a nonce field
+	$nonce=wp_create_nonce('kpgkindlethis');
+	$p['nonce']=$nonce;
+	
     global $wp_query;
 	$posts = $wp_query->posts;
+	if (empty($posts)) $posts=array();
 	$pids=array();
-	if (empty($posts)) {
-		wp_cache_set( 'kindle_this', serialize($pids) );
-		return $huh;
-	}
 	// capture the posts
 	foreach ($posts as $post) {
 		$id=$post->ID;
 		$pids[count($pids)]=$id;
 	}
+	$p['posts']=$pids;
+	$p['idx']=0;
 // cache the id array for latter	
-    wp_cache_set( 'kindle_this', serialize($pids) );
+    wp_cache_set( 'kindle_this', $p );
 	return $huh;
 }
 
 // establish the blog itself as the action target
 	add_action('init', 'kpg_kindle_this_mailer');	
 function kpg_kindle_this_mailer() {
+
     if (!array_key_exists('kpg_ksub',$_GET)) {
 	    print_r($GET);
 		return;
@@ -324,17 +340,29 @@ function kpg_kindle_this_mailer() {
 	$ansa.=$kpg_kindle_template_top;
 	
 	$posts=unserialize($p);
+	
+	// remove kindle this shortcode
+	remove_shortcode('kindlethis'); // in case I can't find it.
+
 	if (!empty($p)&&!empty($ke)&&!empty($fe)&&!empty($posts)&&count($posts)>0) {
 		$ddate='';
 	    for ($j=0;$j<count($posts);$j++) {
 			$id=$posts[$j];
 			$post=get_post($id);
-			$title=$post->post_title;
+			$title=htmlentities($post->post_title);
 			$date=$post->post_date;
-			$author=$post->post_author;
+			$author=htmlentities($post->post_author);
 			$post_url=get_permalink($id);
 			if ($j==0) $ddate=$date;
 			$content=$post->post_content;
+			// get rid of the kindle this shortcode
+			$jj=strpos($content,'[kindlethis');
+			if ($jj>0) {
+				$kk=strpos($content,']',$jj+2);
+				if ($kk>$jj) {
+					$content=substr($content,0,$jj).substr($content,$kk+1);
+				}
+			}
 			$content=do_shortcode($content);
 			// do replacements on the post
 			$a=$kpg_kindle_template_post;
@@ -607,6 +635,61 @@ function kpg_kindle_this_mail( $to, $subject, $message, $headers = '', $attachme
 
 	return $result;
 }
+// shortcode for form
+// same as widget, except uses the single post id to send to amazon.
+// form is styled a little larger in a div
+
+function kpg_kindlethis_sc($atts, $content=null) {
+	extract( shortcode_atts( array(
+		'style' => ''
+		), $atts ) );
+	if (empty($title)) $title='Send this to Kindle';
+	$p=wp_cache_get( 'kindle_this');
+	if (empty($p)) $p=array();
+	$nonce='';
+	$idx=0;
+	$posts=array();
+	if (array_key_exists('nonce',$p)) $nonce=$p['nonce'];
+	if (array_key_exists('idx',$p)) $idx=$p['idx'];
+	if (array_key_exists('posts',$p)) $posts=$p['posts'];
+	$posts=serialize($posts);
+	// need to find the id of the post - replace posts for single post only short code
+	$id=get_the_ID();
+	$posts=serialize(array($id));
+	$post=get_post($id);
+	$title=htmlentities($post->post_title);
+	$post_url=get_permalink($id);
+
+	$idx++;
+	$p['idx']=$idx;
+	wp_cache_set( 'kindle_this', $p );
+	$path=home_url();
+
+	$ansa="
+		<div style=\"$style\">
+		<form action=\"$path\" target=\"kindlethis$idx\" method=\"GET\">
+				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>your kindle email address:</legend>
+				<input  size=\"24\" name=\"kindle_email\" type=\"text\" value=\"your-id\"/>@free.kindle.com</fieldset>
+				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>valid from email address:</legend>
+				<input  size=\"24\" name=\"from_email\" type=\"text\" value=\"good@email\"/><br/>(email that kindle will accept)
+				</fieldset>
+				<input type=\"submit\" name=\"kpg_ksub\" value=\"send to kindle\"/>
+				<input type=\"hidden\" name=\"postarray\" value=\"$posts\" />
+				<input type=\"hidden\" name=\"kindletitle\" value=\"$title\" />
+				<input type=\"hidden\" name=\"kindleloc\" value=\"$post_url\" />
+				<input type=\"hidden\" name=\"kpgkindlethisnonce\" value=\"$nonce\" />
+		</form>
+		</div>
+		<iframe style=\"visibility:hidden;position:absolute;left:-2;width:1;height:1;\" name=\"kindlethis$idx\">
+		</iframe>
+	";
+	return $ansa;
+}
+add_shortcode('kindlethis', 'kpg_kindlethis_sc');
+
+
+
+
 function kpg_kindle_this_uninstall() {
 	if(!current_user_can('manage_options')) {
 		die('Access Denied');
