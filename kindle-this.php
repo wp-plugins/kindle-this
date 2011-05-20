@@ -398,7 +398,7 @@ from your allowed email addresses at http://kindle.com";
 	$options['count']=$count;
 	update_option('kpg_kindlethis_options',$options);
 		
-	echo "done, Document sent to kindel";
+	echo "done, Document sent to kindle";
 	flush();
 	exit();
 }
