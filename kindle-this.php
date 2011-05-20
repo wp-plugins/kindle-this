@@ -330,6 +330,8 @@ function kpg_kindle_this_mailer() {
 				}
 			}
 			$content=do_shortcode($content);
+			$content=str_replace("\r\n","<p>",$content);
+			$content=str_replace("\n","<p>",$content);
 			// do replacements on the post
 			$a=$kpg_kindle_template_post;
 			$a=str_replace('[kindle_blogname]',$blog,$a);
