@@ -4,13 +4,16 @@ Plugin Name: Kindle This
 Plugin URI: http://www.blogseye.com
 Description: Sends a blog post or page to a user's kindle.
 Author: Keith P. Graham
-Version: 1.3
-Requires at least: 2.8
+Version: 2.0
+Requires at least: 2.9
 Author URI: http://www.blogseye.com
-Tested up to: 3.1
+Tested up to: 3.2
+Donate link: http://www.amazon.com/gp/product/1456336584?ie=UTF8&tag=thenewjt30page&linkCode=as2&camp=1789&creative=390957&creativeASIN=1456336584
 
 */
-
+/******************************************
+     Widget section
+*******************************************/
 class widget_kindle_this extends WP_Widget {
 
    /** constructor */
@@ -47,48 +50,15 @@ class widget_kindle_this extends WP_Widget {
 		extract( $args );
 		$title = esc_attr($instance['title']);
 		// the loop ids have been cached - get them back
-		$p=wp_cache_get( 'kindle_this');
-		if (empty($p)) $p=array();
-		$nonce='';
-		$idx=0;
-		$posts=array();
-		if (array_key_exists('nonce',$p)) $nonce=$p['nonce'];
-		if (array_key_exists('idx',$p)) $idx=$p['idx'];
-		if (array_key_exists('posts',$p)) $posts=$p['posts'];
-		$posts=serialize($posts);
-		$idx++;
-		$p['idx']=$idx;
-		wp_cache_set( 'kindle_this', $p );
 		
 		echo $before_widget;
 		if ( $title) {
 			echo $before_title . $title . $after_title;
 		}
-		// out goes out here;
-		// this is the form for sending the widget
-		$path=home_url();
 		?>
 		<div style="font-style:italic;font-size:.9em;">
-		<form name="kpgkindlethis<?php echo $idx;?>" action="<?php echo $path; ?>" target="kindlethis<?php echo $idx;?>" method="GET">
-				<fieldset style="border:thin black solid;padding:2px;"><legend>your kindle email address:</legend>
-				<input style="font-size:.9em;" size="16" name="kindle_email" type="text" value="your-id"/>@free.kindle.com</fieldset>
-				<fieldset style="border:thin black solid;padding:2px;"><legend>valid from email address:</legend>
-				<input style="font-size:.9em;" size="16" name="from_email" type="text" value="good@email"/><br/>(email that kindle will accept)
-				</fieldset>
-				<input type="submit" name="kpg_ksub" value="send to kindle"/>
-				<input type="hidden" name="postarray" value="<?php echo $posts;?>" />
-				<input type="hidden" name="kindletitle" value="" />
-				<input type="hidden" name="kindleloc" value="" />
-				<input type="hidden" name="kpgkindlethisnonce" value="<?php echo $nonce;?>" />
-				<script language="javascript" type="text/javascript">
-					document.kpgkindlethis<?php echo $idx;?>.kindletitle.value=document.title;
-					document.kpgkindlethis<?php echo $idx;?>.kindleloc.value=document.location;
-				</script>
-		</form>
-		</div>
-		<iframe style="visibility:hidden;position:absolute;left:-2;width:1;height:1;" name="kindlethis<?php echo $idx;?>">
-		</iframe>
-		
+        <?php echo kpg_get_kindle_form(); ?>
+		</div>		
 		<?PHP
 		// close the ul or select or add a blank line
 		echo $after_widget;
@@ -97,9 +67,15 @@ class widget_kindle_this extends WP_Widget {
 	}
 
 }
-
-// wp_get_archives(apply_filters('widget_archives_args', array('type' => 'monthly', 'show_post_count' => $c))); 
 add_action('widgets_init', create_function('', 'return register_widget("widget_kindle_this");'));
+/******************************************
+     End of Widget section
+*******************************************/
+
+/******************************************
+     Plugin admin section
+*******************************************/
+
 
 // this is the plugins page stuff
 // no unistall because I have not created any meta data to delete.
@@ -112,17 +88,29 @@ function kpg_kindle_this_control() {
 	// this is the Kindle This functionality.
  	$options=get_option('kpg_kindlethis_options');
 	if (empty($options)) $options=array();
-	// cache bad cases
 	if (array_key_exists('count',$options)) {
 		$count=$options['count'];
 	}
 ?>
 
 <h2>Kindle This</h2>
+<div style="position:relative;float:right;width:40%;background-color:ivory;border:#333333 medium groove;padding-left:6px;">
+ <p>This plugin is free and I expect nothing in return. If you would like to support my programming, you can buy my book of short stories.</p><p>Some plugin authors ask for a donation. I ask you to spend a very small amount for something that you will enjoy. eBook versions for the Kindle and other book readers start at 99&cent;. The book is much better than you might think, and it has some very good science fiction writers saying some very nice things. <br/>
+ <a target="_blank" href="http://www.amazon.com/gp/product/1456336584?ie=UTF8&tag=thenewjt30page&linkCode=as2&camp=1789&creative=390957&creativeASIN=1456336584">Error Message Eyes: A Programmer's Guide to the Digital Soul</a></p>
+ <p>A link on your blog to one of my personal sites would also be appreciated.</p>
+ <p><a target="_blank" href="http://www.WestNyackHoney.com">West Nyack Honey</a> (I keep bees and sell the honey)<br />
+	<a target="_blank" href="http://www.cthreepo.com/blog">Wandering Blog </a> (My personal Blog) <br />
+	<a target="_blank" href="http://www.cthreepo.com">Resources for Science Fiction</a> (Writing Science Fiction) <br />
+	<a target="_blank" href="http://www.jt30.com">The JT30 Page</a> (Amplified Blues Harmonica) <br />
+	<a target="_blank" href="http://www.harpamps.com">Harp Amps</a> (Vacuum Tube Amplifiers for Blues) <br />
+	<a target="_blank" href="http://www.blogseye.com">Blog&apos;s Eye</a> (PHP coding) <br />
+	<a target="_blank" href="http://www.cthreepo.com/bees">Bee Progress Beekeeping Blog</a> (My adventures as a new beekeeper) </p>
+</div>
 <p>The Kindle-This widget is installed and working correctly.</p>
 
 <p>Number of Kindle pages sent: <?php echo $count; ?></p>
-	
+<p>&nbsp;</p>
+<p>Remember, if you don't want to use the widget, you can place a short code [kindlethis] on any page that you want the user to be able to send to their kindle</p>	
 	
 	<?php
 	
@@ -133,7 +121,6 @@ function kpg_kindle_this_control() {
 	if (array_key_exists('action',$_POST)) {
 		// check the nonce
 		if(wp_verify_nonce($_POST['kpg_kindle_this_control'],'kpgkindlethis_update')) { 
-			echo "<br/>Updating<br/>";
 			// pressed submit
 			// get the fields off from the form
 			// kpg_kindle_template_top, kpg_kindle_template_post, kpg_kindle_template_foot
@@ -144,27 +131,22 @@ function kpg_kindle_this_control() {
 			$options['kpg_kindle_template_post']=$kpg_kindle_template_post;
 			$options['kpg_kindle_template_foot']=$kpg_kindle_template_foot;
 			update_option('kpg_kindlethis_options',$ops);
+			echo "<h3>Options Updated</h3>";
 		}
 	}
 	if (array_key_exists('kpg_kindle_template_top',$options)) $kpg_kindle_template_top=$options['kpg_kindle_template_top'];
 	if (array_key_exists('kpg_kindle_template_post',$options)) $kpg_kindle_template_post=$options['kpg_kindle_template_post'];
 	if (array_key_exists('kpg_kindle_template_foot',$options)) $kpg_kindle_template_foot=$options['kpg_kindle_template_foot'];
 
-
-
-
-
-
 	?>
 <h3>Templates</h3>
-
+<p>Use the template settings to change what the user sees in their email and to change the way the pages sent to the kindle are formatted. The Amazon Kindle conversion, though, will remove all images and most of the css in the post. This is done at the Kindle site and is out of our control.</p>
  <form method="post" action="">
     <input type="hidden" name="action" value="update" />
      <?php wp_nonce_field('kpgkindlethis_update','kpg_kindle_this_control'); ?>
 <table class="form-table">
 	<tbody>
 	<tr valign="top">
-	<th scope="row">Kindle this template</th>
 	<td>
 	<p>This controls what will be displayed at the top before the actual content area. </p>
 	<p>You can use the following tags:</p>
@@ -217,25 +199,25 @@ function kpg_kindle_this_control() {
 </tbody></table>
 <p class="submit"><input class="button-primary" value="Save Changes" type="submit"></p>
 </form>
-	
-	
-	
-	
-	
-	
 	<?php
 
 }
+
+/******************************************
+     End Plugin admin section
+*******************************************/
+
+/******************************************
+     Capture loop info.
+	 This is used in sending the email
+*******************************************/
+
+
 // also have to hook the loop in order to catch the ids
-	add_action('loop_start', 'kpg_kindle_this_catchloop');	
-function kpg_kindle_this_catchloop($huh) {
+add_action('loop_start', 'kpg_kindle_this_catchloop');	
+function kpg_kindle_this_catchloop($param) {
 	// this sets up the common array for the forms
 	// store these items in an array for this
-	$p=array();
-	// set up a nonce field
-	$nonce=wp_create_nonce('kpgkindlethis');
-	$p['nonce']=$nonce;
-	
     global $wp_query;
 	$posts = $wp_query->posts;
 	if (empty($posts)) $posts=array();
@@ -245,55 +227,41 @@ function kpg_kindle_this_catchloop($huh) {
 		$id=$post->ID;
 		$pids[count($pids)]=$id;
 	}
-	$p['posts']=$pids;
-	$p['idx']=0;
-// cache the id array for latter	
-    wp_cache_set( 'kindle_this', $p );
-	return $huh;
+    wp_cache_set( 'kindle_this', $pids );
+	return $param;
 }
+/******************************************
+     End of Capture loop info.
+*******************************************/
 
-// establish the blog itself as the action target
-	add_action('init', 'kpg_kindle_this_mailer');	
+
+/******************************************
+     Ajax Mailer
+*******************************************/
+
+	add_action('wp_ajax_nopriv_kindle_this', 'kpg_kindle_this_mailer');	
+	add_action('wp_ajax_kindle_this', 'kpg_kindle_this_mailer');	
 function kpg_kindle_this_mailer() {
+	// the parameters passed to the AJAX callback are in the post!
 
-    if (!array_key_exists('kpg_ksub',$_GET)) {
-	    print_r($GET);
-		return;
-	}
+ 	// there are from the get
     $p=$_GET['postarray'];
     $ke=$_GET['kindle_email'];
     $fe=$_GET['from_email'];
-
+	$nonce=$_GET['kindlethis_nonce'];
+	$kt=$_GET['kindletitle'];
+	$kl=$_GET['kindleloc'];
+	//echo "Parameters passed= p=$p, ke=$ke, fe=$fe, nonce=$nonce, kt=$kt, kl=$kl\r\n";
 	
-	if (!empty($p)||!empty($ke)||!empty($fe)) {
-		// check the parameters
-		if (empty($p)) { ?>
-			<script language="javascript" type="text/javascript">alert("Problem retrieving the page");</script>
-		<?php 
-            flush();		
-			exit(); 
-		}
-		if (empty($ke) || $ke=='your-id') { ?>
-			<script language="javascript" type="text/javascript">alert("Please enter your Kindle email");</script>
-		<?php 		
-            flush();		
-			exit(); 
-		}
-		if (empty($fe) || $fe=='good@email') { ?>
-			<script language="javascript" type="text/javascript">alert("Please enter an email address that Free.Kindle.com will accept");</script>
-		<?php 
-            flush();		
-			exit(); 
-		}
-	}
 	// check the nonce
-	if(!wp_verify_nonce($_GET['kpgkindlethisnonce'],'kpgkindlethis')) { ?>
-			<script language="javascript" type="text/javascript">alert("Problem in checking that this came from this blog");</script>
-     <?php
-			flush();		
-			exit(); 
+	if(!wp_verify_nonce($nonce,'kpgkindlethis')) { 
+		// data is returned here by echoing it out. the results are place in the span on the widget or whatever
+		echo "Error: The nonce data cannot be verified '$nonce'\r\n";
+		flush();		
+		exit(); 
 	}
 	$options=get_option('kpg_kindlethis_options');
+	if (empty($options)||!is_array($opptions)) $options=array();
 	$kpg_kindle_template_top='<h3>[kindle_blogname]</h3>
 <h4><a href="[kindle_page_url]">[kindle_page_title]</a></h4>
 <p>This is the page that your requested at [kindle_blogname].</p>
@@ -316,10 +284,8 @@ function kpg_kindle_this_mailer() {
 	
 	$blog=get_bloginfo('name');
 	$blogurl=home_url();
-	$kt=$_GET['kindletitle'];
 	$kt=stripslashes($kt);
-    $kl=$_GET['kindleloc'];
-	$kd=get_bloginfo('description');
+ 	$kd=get_bloginfo('description');
     if (empty($kl)) $kl=$blogurl;
 	if (empty($kt)) $kt=$blog;
 	$filename=sanitize_title($kt).'.html';
@@ -411,16 +377,19 @@ from your allowed email addresses at http://kindle.com";
 		$mail_sent=kpg_kindle_this_mail($to, $subject, $message, $headers,$attachments);
 		//$mail_sent = @mail( $to, $subject, $message, $headers );
 		//if the message is sent successfully print "Mail sent". Otherwise print "Mail failed"
-		if ($mail_sent) {
-			?> <script>alert("Web Page sent to free.kindle.com");</script> 	<?php	
-		} else {		
-			?> <script>alert("There was an error sending the email to kindle");</script> <?php
+		if (!$mail_sent) {
+			echo "There was an error sending the email to kindle";
+			flush();
+			exit();
 		}
+	} else {
+		echo "\r\nNo pages sent due to error?\r\n";
+		flush();
+		exit();
 	}
 	// we need to record the count of pages sent
 	$options=get_option('kpg_kindlethis_options');
 	if (empty($options)) $options=array();
-	// cache bad cases
 	$count=0;
 	if (array_key_exists('count',$options)) {
 		$count=$options['count'];
@@ -428,8 +397,9 @@ from your allowed email addresses at http://kindle.com";
 	$count++;
 	$options['count']=$count;
 	update_option('kpg_kindlethis_options',$options);
-	
-flush();
+		
+	echo "done, Document sent to kindel";
+	flush();
 	exit();
 }
 
@@ -644,45 +614,10 @@ function kpg_kindlethis_sc($atts, $content=null) {
 		'style' => ''
 		), $atts ) );
 	if (empty($title)) $title='Send this to Kindle';
-	$p=wp_cache_get( 'kindle_this');
-	if (empty($p)) $p=array();
-	$nonce='';
-	$idx=0;
-	$posts=array();
-	if (array_key_exists('nonce',$p)) $nonce=$p['nonce'];
-	if (array_key_exists('idx',$p)) $idx=$p['idx'];
-	if (array_key_exists('posts',$p)) $posts=$p['posts'];
+	$posts=wp_cache_get( 'kindle_this');
+	if (empty($posts)) $posts=array();
 	$posts=serialize($posts);
-	// need to find the id of the post - replace posts for single post only short code
-	$id=get_the_ID();
-	$posts=serialize(array($id));
-	$post=get_post($id);
-	$title=htmlentities($post->post_title);
-	$post_url=get_permalink($id);
-
-	$idx++;
-	$p['idx']=$idx;
-	wp_cache_set( 'kindle_this', $p );
-	$path=home_url();
-
-	$ansa="
-		<div style=\"$style\">
-		<form action=\"$path\" target=\"kindlethis$idx\" method=\"GET\">
-				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>your kindle email address:</legend>
-				<input  size=\"24\" name=\"kindle_email\" type=\"text\" value=\"your-id\"/>@free.kindle.com</fieldset>
-				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>valid from email address:</legend>
-				<input  size=\"24\" name=\"from_email\" type=\"text\" value=\"good@email\"/><br/>(email that kindle will accept)
-				</fieldset>
-				<input type=\"submit\" name=\"kpg_ksub\" value=\"send to kindle\"/>
-				<input type=\"hidden\" name=\"postarray\" value=\"$posts\" />
-				<input type=\"hidden\" name=\"kindletitle\" value=\"$title\" />
-				<input type=\"hidden\" name=\"kindleloc\" value=\"$post_url\" />
-				<input type=\"hidden\" name=\"kpgkindlethisnonce\" value=\"$nonce\" />
-		</form>
-		</div>
-		<iframe style=\"visibility:hidden;position:absolute;left:-2;width:1;height:1;\" name=\"kindlethis$idx\">
-		</iframe>
-	";
+    $ansa=kpg_get_kindle_form();
 	return $ansa;
 }
 add_shortcode('kindlethis', 'kpg_kindlethis_sc');
@@ -700,5 +635,142 @@ function kpg_kindle_this_uninstall() {
 if ( function_exists('register_uninstall_hook') ) {
 	register_uninstall_hook(__FILE__, 'kpg_kindle_this_uninstall');
 }
+// load the javascript into the header
+	add_action('wp_footer', 'kpg_foot_ajax');	
 
+function kpg_foot_ajax() {
+	// put this in the foot so as not to slow down the blog too much
+	// this is the custom ajax stuff - I use this just because I don't want to have to check what jscript lib is loaded.
+	// The AJAX code is so damn simple that it doesn't really matter if I roll my own
+	$ajax_url=admin_url('admin-ajax.php');
+	$nonce=wp_create_nonce('kpgkindlethis');
+    $posts=wp_cache_get( 'kindle_this');
+	$p=serialize($posts);
+
+?>
+<script type="text/javascript">
+/* <![CDATA[ */
+var kpg_kindle_count=0;
+
+function kpg_kindle_it(t) {
+	// this is the function triggered by submitting the form
+	// this has to do the ajaxload function.
+	// first thing is to check the data coming in to make sure that it is correct.
+	if (t.kindle_email.value==""||t.kindle_email.value=="your-id") {
+		alert("Please enter a valid Kindle ID");
+		t.kindle_email.focus();
+		return false;
+	}
+	if (t.from_email.value==""||t.from_email.value=="good@email") {
+		alert("Please enter a valid Approved E-mail");
+		t.from_email.focus();
+		return false;
+	}
+	// need to build the GET command line for the ajax-admin call
+	var url="<?php echo $ajax_url; ?>?action=kindle_this";
+	// build the parameters
+	url=url+"&kindle_email="+t.kindle_email.value;
+	url=url+"&from_email="+t.from_email.value;
+	url=url+"&postarray="+"<?php echo $p; ?>";
+	url=url+"&kindletitle="+document.title;
+	url=url+"&kindleloc="+document.location;
+	url=url+"&kindlethis_nonce=<?php echo $nonce; ?>";
+	// sent message here
+	kpg_kindle_count=t.kpg_kindle_count.value;
+	var kid=document.getElementById("kpg_kc_"+kpg_kindle_count);
+	kid.innerHTML="Sending Document to Kindle</br>";
+	kjaxLoad(url,kjax_setData);
+	return false;
+}
+function kjaxObject() {
+   this.handler=null;this.done=false;this.url="";this.where="";
+}
+var kjax_reqs=new Array();
+
+function kjaxLoad(url,handler) {
+	// handler is the procedure that will deal with the data
+    // in my tests this is kjaxLoad("testdata.txt,kjax_setData);
+	// testdata.txt is any xml formatted html file - it will eventually be a program to porduce the xhtml
+	// kjax_setData is the generic innerHTML setter below
+	// kbox is the id of a div where I put the results.
+	// create a handler object for this request
+    try {
+		var j=0;
+		for (j=0;j<kjax_reqs.length;j++) {
+			if (kjax_reqs[j].done) 
+				break;
+		}
+		kjax_reqs[j]=new kjaxObject();	
+		kjax_reqs[j].done=false;
+		kjax_reqs[j].url=url;
+		kjax_reqs[j].handler=handler;
+		if (window.XMLHttpRequest) {
+			kjax_reqs[j].req=new XMLHttpRequest();
+			kjax_reqs[j].req.onreadystatechange = kjax_processReqChange;
+			kjax_reqs[j].req.open("GET", url, true);
+			kjax_reqs[j].req.send(null);
+		} else if (window.ActiveXObject) {
+			kjax_reqs[j].req=new ActiveXObject("Microsoft.XMLHTTP");
+			kjax_reqs[j].req.onreadystatechange = kjax_processReqChange;
+			kjax_reqs[j].req.open("GET", url, true);
+			kjax_reqs[j].req.send();
+		}
+	} catch (e) {
+		alert("ajax load error:"+e);
+	}
+}
+function kjax_processReqChange() {
+ 	var j=0;
+        try {
+	for (j=0;j<kjax_reqs.length;j++) {
+		if (!kjax_reqs[j].done) {
+			if (kjax_reqs[j].req.readyState == 4) {
+				if (kjax_reqs[j].req.status == 200||kjax_reqs[j].req.status == 0) {
+					kjax_reqs[j].done=true;
+					kjax_reqs[j].handler(kjax_reqs[j].req.responseText);
+				 } else {
+					kjax_reqs[j].done=true;
+					kjax_reqs[j].handler("Failed"); // sends back a blank
+				 }
+			}
+		}
+	}
+        } catch (e) {
+            alert("ajax process error:"+e);
+        }
+}
+function kjax_setData(s) {
+	var kid=document.getElementById("kpg_kc_"+kpg_kindle_count);
+	kid.innerHTML="Returned from Sending Document to Kindle<br/>";
+	try {
+		var idsc;
+		alert("setting data, back from ajax:"+s);
+	} catch (e) {
+		alert("ajax set data error:"+e);
+	}
+}
+/* ]]> */
+</script>
+
+<?php
+}
+$kpg_kindle_count=0;
+function kpg_get_kindle_form() {
+	// made one function to return the kindle form.
+	global $kpg_kindle_count;
+	$kpg_kindle_count=$kpg_kindle_count+1;
+	$ansa="<form  action=\"#\" method=\"GET\" onsubmit=\"kpg_kindle_it(this);return false;\">
+				<span style=\"color:red;font-weight:bold\" id=\"kpg_kc_$kpg_kindle_count\"></span>
+				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>your kindle email address:</legend>
+				<input style=\"font-size:.9em;\" size=\"16\" name=\"kindle_email\" type=\"text\" value=\"your-id\"/>@free.kindle.com</fieldset>
+				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>Approved E-mail:</legend>
+				<input style=\"font-size:.9em;\" size=\"16\" name=\"from_email\" type=\"text\" value=\"good@email\"/><br/>(Approved E-mail that kindle will accept)
+				</fieldset>
+				<input type=\"submit\" name=\"kpg_ksub\" value=\"send to kindle\"/>
+				<input type=\"hidden\" name=\"kpg_kindle_count\" value=\"$kpg_kindle_count\"/>
+		</form>";
+		
+		return $ansa;
+
+}
 
