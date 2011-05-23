@@ -4,7 +4,7 @@ Plugin Name: Kindle This
 Plugin URI: http://www.blogseye.com
 Description: Sends a blog post or page to a user's kindle.
 Author: Keith P. Graham
-Version: 2.0
+Version: 2.1
 Requires at least: 2.9
 Author URI: http://www.blogseye.com
 Tested up to: 3.2
