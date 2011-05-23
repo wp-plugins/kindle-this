@@ -1,6 +1,6 @@
 === Kindle This ===
 Tags: Amazon, Kindle, sidebar, widget, plugin, shortcode
-Stable tag: 2.0
+Stable tag: 2.1
 Requires at least: 2.9
 Tested up to: 3.2
 Contributors: Keith P. Graham
@@ -47,6 +47,10 @@ You can style a div containing the form by using a style=parameter such as [kind
 
 = 2.0 =
 * Use AJAX to send message rather than direct blog access.
+
+= 2.1 =
+* encoded title for utf-8. Placed the javascript in a separate js file. It was screwing up too many people by putting it in the footer.
+* Fixed bugs in the template design. I found three different ones that prevented it from working. I apologise for that.
 
 == Support ==
 This plugin is free and I expect nothing in return. If you wish to support my programming, buy my Kindle ebook (cheap): 
