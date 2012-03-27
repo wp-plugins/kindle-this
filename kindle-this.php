@@ -4,11 +4,11 @@ Plugin Name: Kindle This
 Plugin URI: http://www.blogseye.com
 Description: Sends a blog post or page to a user's kindle.
 Author: Keith P. Graham
-Version: 2.1
+Version: 2.2
 Requires at least: 2.9
 Author URI: http://www.blogseye.com
-Tested up to: 3.2
-Donate link: http://www.amazon.com/gp/product/1456336584?ie=UTF8&tag=thenewjt30page&linkCode=as2&camp=1789&creative=390957&creativeASIN=1456336584
+Tested up to: 3.3.1
+Donate link: http://www.blogseye.com/buy-the-book/
 
 */
 /******************************************
@@ -56,7 +56,7 @@ class widget_kindle_this extends WP_Widget {
 			echo $before_title . $title . $after_title;
 		}
 		?>
-		<div style="font-style:italic;font-size:.9em;">
+		<div style="font-size:.9em;">
         <?php echo kpg_get_kindle_form(); ?>
 		</div>		
 		<?PHP
@@ -97,7 +97,7 @@ function kpg_kindle_this_control() {
 <h2>Kindle This</h2>
 <div style="position:relative;float:right;width:40%;background-color:ivory;border:#333333 medium groove;padding-left:6px;">
  <p>This plugin is free and I expect nothing in return. If you would like to support my programming, you can buy my book of short stories.</p><p>Some plugin authors ask for a donation. I ask you to spend a very small amount for something that you will enjoy. eBook versions for the Kindle and other book readers start at 99&cent;. The book is much better than you might think, and it has some very good science fiction writers saying some very nice things. <br/>
- <a target="_blank" href="http://www.amazon.com/gp/product/1456336584?ie=UTF8&tag=thenewjt30page&linkCode=as2&camp=1789&creative=390957&creativeASIN=1456336584">Error Message Eyes: A Programmer's Guide to the Digital Soul</a></p>
+ <a target="_blank" href="http://www.blogseye.com/buy-the-book/">Error Message Eyes: A Programmer's Guide to the Digital Soul</a></p>
  <p>A link on your blog to one of my personal sites would also be appreciated.</p>
  <p><a target="_blank" href="http://www.WestNyackHoney.com">West Nyack Honey</a> (I keep bees and sell the honey)<br />
 	<a target="_blank" href="http://www.cthreepo.com/blog">Wandering Blog </a> (My personal Blog) <br />
@@ -190,7 +190,7 @@ function kpg_kindle_this_control() {
 	} else {
 	?><p>Thank you for visiting [kindle_blogname]<p>
 <p>&nbsp;</p><p>&nbsp;</p>
-<p style="font-size:small;">The Free WordPress Kindle-This plugin was written by Keith P. Graham, author of <a href="http://www.amazon.com/gp/product/B004C05DTC?ie=UTF8&tag=thenewjt30page&linkCode=as2&camp=1789&creative=390957&creativeASIN=B004C05DTC">Error Message Eyes: a programmer's guide to the digital soul.</a></p>
+<p style="font-size:small;">The Free WordPress Kindle-This plugin was written by Keith P. Graham, author of <a href="http://www.blogseye.com/buy-the-book/">Error Message Eyes: a programmer's guide to the digital soul.</a></p>
 <hr/>
 <?php } ?>
 	</textarea>
@@ -252,7 +252,8 @@ function kpg_kindle_this_mailer() {
 	$nonce=$_GET['kindlethis_nonce'];
 	$kt=$_GET['kindletitle'];
 	$kl=$_GET['kindleloc'];
-	//echo "Parameters passed= p=$p, ke=$ke, fe=$fe, nonce=$nonce, kt=$kt, kl=$kl\r\n";
+	$kc=$_GET['kindlecom'];
+	//echo "Parameters passed= p=$p, ke=$ke, fe=$fe, nonce=$nonce, kc=$kc, kt=$kt, kl=$kl\r\n";
 	
 	// check the nonce
 	if(!wp_verify_nonce($nonce,'kpgkindlethis')) { 
@@ -281,7 +282,7 @@ function kpg_kindle_this_mailer() {
 ';
 	$kpg_kindle_template_foot="<p>Thank you for visiting [kindle_blogname]<p>
 <p>&nbsp;</p><p>&nbsp;</p>
-<p style=\"font-size:small;\">The Free WordPress Kindle-This plugin was written by Keith P. Graham, author of <a href=\"http://www.amazon.com/gp/product/B004C05DTC?ie=UTF8&tag=thenewjt30page&linkCode=as2&camp=1789&creative=390957&creativeASIN=B004C05DTC\">Error Message Eyes: a programmer's guide to the digital soul.</a></p>
+<p style=\"font-size:small;\">The Free WordPress Kindle-This plugin was written by Keith P. Graham, author of <a href=\"http://www.blogseye.com/buy-the-book/\">Error Message Eyes: a programmer's guide to the digital soul.</a></p>
 
 ";
 	if (array_key_exists('kpg_kindle_template_top',$options)) $kpg_kindle_template_top=$options['kpg_kindle_template_top'];
@@ -315,7 +316,7 @@ function kpg_kindle_this_mailer() {
 	
 	// remove kindle this shortcode
 	remove_shortcode('kindlethis'); // in case I can't find it.
-	if (!empty($p)&&!empty($ke)&&!empty($fe)&&!empty($posts)&&count($posts)>0) {
+	if (!empty($ke)&&!empty($fe)&&count($posts)>0) {
 		$ddate='';
 	    for ($j=0;$j<count($posts);$j++) {
 			$id=$posts[$j];
@@ -369,9 +370,9 @@ function kpg_kindle_this_mailer() {
 		
 		
 		$ansa.='</body></html>';
-		$to=$ke.'@free.kindle.com';
+		$to=$ke.'@'.$kc;
 		
-		$subject = "Web page from $kt $date";
+		$subject = "Convert Web page from $kt $date";
 		$headers = "From: $fe\r\nReply-To: $fe\r\nCc: $fe";
 		
 		$message = "
@@ -393,6 +394,8 @@ from your allowed email addresses at http://kindle.com";
 		}
 	} else {
 		echo "\r\nNo pages sent due to error?\r\n";
+		//echo "\r\n$p, $ke, $fe, ".count($posts)."\r\n";
+		// (!empty($p)&&!empty($ke)&&!empty($fe)&&!empty($posts)&&count($posts)>0)
 		flush();
 		exit();
 	}
@@ -666,12 +669,19 @@ function kpg_get_kindle_form() {
     $posts=wp_cache_get( 'kindle_this');
 	$p=serialize($posts);
 
-	$ansa="<form  action=\"#\" method=\"GET\" onsubmit=\"kpg_kindle_it(this);return false;\">
+	$ansa="<form  action=\"\" method=\"GET\" onsubmit=\"kpg_kindle_it(this);return false;\">
 				<span style=\"color:red;font-weight:bold\" id=\"kpg_kc_$kpg_kindle_count\"></span>
-				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>your kindle email address:</legend>
-				<input style=\"font-size:.9em;\" size=\"16\" name=\"kindle_email\" type=\"text\" value=\"your-id\"/>@free.kindle.com</fieldset>
+				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>your kindle user name:</legend>
+				<input style=\"font-size:.9em;\" size=\"32\" name=\"kindle_email\" type=\"text\" value=\"your-id\"/><br/>(you@kindle.com, without @kindle.com)</fieldset>
 				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>Approved E-mail:</legend>
-				<input style=\"font-size:.9em;\" size=\"16\" name=\"from_email\" type=\"text\" value=\"good@email\"/><br/>(Approved E-mail that kindle will accept)
+				<input style=\"font-size:.9em;\" size=\"32\" name=\"from_email\" type=\"text\" value=\"good@email\"/><br/>(Approved E-mail that kindle will accept)
+				</fieldset>
+				<fieldset style=\"border:thin black solid;padding:2px;\"><legend>Kindle base email</legend>
+				  <input name=\"kindlecom\" type=\"radio\" value=\"kindle.com\" checked=\"checked\" />
+  kindle.com | 
+  <input name=\"kindlecom\" type=\"radio\" value=\"free.kindle.com\" /> 
+  free.kindle.com
+<br/>(Use kindle.com to download on wispernet or wifi, use free.kindle.com for wifi only.)<br/><i>using kindle.com may incur charges</i>)
 				</fieldset>
 				<input type=\"submit\" name=\"kpg_ksub\" value=\"send to kindle\"/>
 				<input type=\"hidden\" name=\"kpg_kindle_count\" value=\"$kpg_kindle_count\"/>

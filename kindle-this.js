@@ -1,3 +1,17 @@
+/*
+Plugin Name: Kindle This
+Plugin URI: http://www.blogseye.com
+Description: Sends a blog post or page to a user's kindle.
+Author: Keith P. Graham
+Version: 2.2
+Requires at least: 2.9
+Author URI: http://www.blogseye.com
+Tested up to: 3.3.1
+Donate link: http://www.blogseye.com/buy-the-book/
+
+*/
+
+
 var kpg_kindle_count=0;
 
 function kpg_kindle_it(t) {
@@ -16,9 +30,19 @@ function kpg_kindle_it(t) {
 	}
 	// need to build the GET command line for the ajax-admin call
 	var url=t.kpg_kindle_aurl.value+"?action=kindle_this";
+	// get the radio button value.
+	var kindlecom='kindle.com';
+	
+	//alert ("hey");
+	for (k=0;k<t.kindlecom.length;k++) {
+		if (t.kindlecom[k].checked) {
+			kindlecom=t.kindlecom[k].value;
+		}
+	}
 	// build the parameters
 	url=url+"&kindle_email="+t.kindle_email.value;
 	url=url+"&from_email="+t.from_email.value;
+	url=url+"&kindlecom="+escape(kindlecom);
 	url=url+"&postarray="+t.kpg_kindle_posts.value;
 	url=url+"&kindletitle="+escape(document.title);
 	url=url+"&kindleloc="+escape(document.location);
@@ -92,7 +116,7 @@ function kjax_setData(s) {
 	kid.innerHTML="Returned from Sending Document to Kindle<br/>";
 	try {
 		var idsc;
-		alert("setting data, back from ajax:"+s);
+		alert(s);
 	} catch (e) {
 		alert("ajax set data error:"+e);
 	}
