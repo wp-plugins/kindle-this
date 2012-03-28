@@ -1,6 +1,6 @@
 === Kindle This ===
 Tags: Amazon, Kindle, sidebar, widget, plugin, shortcode
-Stable tag: 2.2
+Stable tag: 2.3
 Requires at least: 2.9
 Tested up to: 3.3.1
 Contributors: Keith P. Graham
@@ -54,6 +54,9 @@ You can style a div containing the form by using a style=parameter such as [kind
 
 = 2.2 =
 * Made the default email address for conversion selectable. Put the word Convert in the subject line.
+
+= 2.3 =
+* Wrong version of 2.2 was uploaded. Sorry for the problem.
 
 == Support ==
 This plugin is free and I expect nothing in return. If you wish to support my programming, buy my Kindle ebook (cheap): 
